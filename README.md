@@ -16,7 +16,7 @@ Each question shows a task and the goal state. You edit real text in an in-brows
 
 | Screen | Keys |
 | --- | --- |
-| Home | `1` practice / `2` test / `c` category / `l` level / `n` number of questions (hold Shift to cycle backwards) / `t` switch language / `Enter` start |
+| Home | `1` practice / `2` test / `c` category / `l` level / `n` number of questions / `d` color scheme (hold Shift to cycle backwards) / `t` switch language / `Enter` start |
 | Quiz | `:hint` show a hint / `:reset` start over / `:skip` skip / `:q` back to home |
 | Results | `r` same settings again / `w` only the missed questions / `Enter` back to home |
 
@@ -31,6 +31,12 @@ The display language is chosen in this order:
 3. The browser's language settings (Japanese if any starts with `ja`, otherwise English)
 
 UI strings live in `src/i18n/messages.ts`. A missing English entry is a type error.
+
+## Color scheme (system / light / dark)
+
+The home screen has a system/light/dark switch, cycled with `d`. The choice is saved in `localStorage`; "system" follows the OS setting via `prefers-color-scheme`.
+
+Colors are CSS custom properties defined in `src/styles.css`: the light values on `:root`, the dark ones on both `:root[data-theme='dark']` and the `prefers-color-scheme: dark` media query. Picking "system" removes the `data-theme` attribute and leaves the media query in charge.
 
 ## Keyboard extensions such as Vimium
 
@@ -98,3 +104,7 @@ npm run deploy
 ```
 
 The configuration is in `wrangler.jsonc`. To deploy from GitHub, connect the repository in Workers Builds on the Cloudflare dashboard, with `npm run build` as the build command and `npx wrangler deploy` as the deploy command.
+
+## License
+
+[MIT](LICENSE)
