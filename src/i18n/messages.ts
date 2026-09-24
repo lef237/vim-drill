@@ -1,4 +1,5 @@
 import type { Category } from '../problems/types';
+import type { Theme } from '../theme';
 
 const ja = {
   appDescription: 'お題どおりにテキストを編集して、Vim の操作を指に覚えさせるトレーニング。',
@@ -29,6 +30,12 @@ const ja = {
   helpReverse: 'Shift を押しながら c / l / n で逆順に切り替え',
   helpDuringQuiz: '出題中は',
   helpLanguage: '言語の切り替え',
+  helpTheme: '配色の切り替え',
+  themes: {
+    system: 'システム',
+    light: 'ライト',
+    dark: 'ダーク',
+  } as Record<Theme, string>,
   sourceCode: 'ソースコード（GitHub）',
   extensionNotice:
     'Vimium などのキー操作系の拡張機能を使っている場合は、このサイトを拡張機能の除外リストに追加してください（Esc が横取りされるため）。',
@@ -112,6 +119,12 @@ const en: Messages = {
   helpReverse: 'Hold Shift with c / l / n to cycle backwards',
   helpDuringQuiz: 'During a quiz:',
   helpLanguage: 'Switch language',
+  helpTheme: 'Switch color scheme',
+  themes: {
+    system: 'System',
+    light: 'Light',
+    dark: 'Dark',
+  },
   sourceCode: 'Source code (GitHub)',
   extensionNotice:
     'If you use a keyboard extension such as Vimium, add this site to its exclusion list — it intercepts the Esc key.',

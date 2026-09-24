@@ -4,6 +4,7 @@ import { allProblems } from '../problems';
 import { COUNT_OPTIONS, filterProblems, type QuizConfig } from '../engine/session';
 import type { Stats } from '../storage';
 import { useI18n } from '../i18n';
+import { THEMES, useTheme } from '../theme';
 
 interface Props {
   config: QuizConfig;
@@ -22,6 +23,7 @@ function cycle<T>(list: T[], current: T, dir: 1 | -1): T {
 
 export function Home({ config, stats, onChange, onStart }: Props) {
   const { t, lang, setLang, toggleLang } = useI18n();
+  const { theme, setTheme } = useTheme();
   const available = filterProblems(allProblems, config).length;
   const weakCount = allProblems.filter((p) => (stats[p.id]?.weak ?? 0) > 0).length;
   const seenCount = allProblems.filter((p) => stats[p.id]).length;
@@ -49,6 +51,9 @@ export function Home({ config, stats, onChange, onStart }: Props) {
         case 't':
           toggleLang();
           break;
+        case 'd':
+          setTheme(cycle(THEMES, theme, dir));
+          break;
         case 'enter':
           if (available > 0) onStart();
           break;
@@ -59,18 +64,28 @@ export function Home({ config, stats, onChange, onStart }: Props) {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [config, onChange, onStart, available, toggleLang]);
+  }, [config, onChange, onStart, available, toggleLang, theme, setTheme]);
 
   return (
     <main className="home">
-      <div className="lang-switch" role="group" aria-label={t.helpLanguage}>
-        <kbd>t</kbd>
-        <button className={lang === 'ja' ? 'active' : ''} aria-pressed={lang === 'ja'} onClick={() => setLang('ja')}>
-          日本語
-        </button>
-        <button className={lang === 'en' ? 'active' : ''} aria-pressed={lang === 'en'} onClick={() => setLang('en')}>
-          English
-        </button>
+      <div className="switch-row">
+        <div className="switch-group" role="group" aria-label={t.helpLanguage}>
+          <kbd>t</kbd>
+          <button className={lang === 'ja' ? 'active' : ''} aria-pressed={lang === 'ja'} onClick={() => setLang('ja')}>
+            日本語
+          </button>
+          <button className={lang === 'en' ? 'active' : ''} aria-pressed={lang === 'en'} onClick={() => setLang('en')}>
+            English
+          </button>
+        </div>
+        <div className="switch-group" role="group" aria-label={t.helpTheme}>
+          <kbd>d</kbd>
+          {THEMES.map((v) => (
+            <button key={v} className={theme === v ? 'active' : ''} aria-pressed={theme === v} onClick={() => setTheme(v)}>
+              {t.themes[v]}
+            </button>
+          ))}
+        </div>
       </div>
 
       <header className="hero">
@@ -133,6 +148,9 @@ export function Home({ config, stats, onChange, onStart }: Props) {
         </span>
         <span>
           <kbd>t</kbd> {t.helpLanguage}
+        </span>
+        <span>
+          <kbd>d</kbd> {t.helpTheme}
         </span>
         <span>
           <a className="repo-link" href="https://github.com/lef237/vim-drill" target="_blank" rel="noopener noreferrer">
