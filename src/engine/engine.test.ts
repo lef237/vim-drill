@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { displayKey, keyFromEvent, tokenizeKeys } from './keys';
-import { firstDivergence, isPrefix, stateMatches } from './judge';
+import { firstDivergence, isCommandPrefix, isPrefix, stateMatches } from './judge';
 import { filterProblems, pickProblems } from './session';
 import { formatMarked, parseMarked } from '../problems/parse';
 import { allProblems } from '../problems';
@@ -60,6 +60,16 @@ describe('judge', () => {
     expect(isPrefix(['c', 'i'], ['c', 'i', 'w'])).toBe(true);
     expect(firstDivergence(['c', 'a'], ['c', 'i', 'w'])).toBe(1);
     expect(firstDivergence(['c', 'i', 'w', 'x'], ['c', 'i', 'w'])).toBe(3);
+  });
+  test('アプリ用コマンドの入力途中か', () => {
+    const names = ['hint', 'skip', 'q', 'quit'];
+    expect(isCommandPrefix([], names)).toBe(true);
+    expect(isCommandPrefix(['h', 'i'], names)).toBe(true);
+    expect(isCommandPrefix(['q', 'u'], names)).toBe(true);
+    expect(isCommandPrefix(['h', 'x', '<BS>', 'i'], names)).toBe(true);
+    expect(isCommandPrefix(['#'], names)).toBe(false);
+    expect(isCommandPrefix(['h', 'i', 'n', 't', 's'], names)).toBe(false);
+    expect(isCommandPrefix(['h', '<Left>'], names)).toBe(false);
   });
 });
 

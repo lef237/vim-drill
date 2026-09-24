@@ -17,3 +17,17 @@ export function firstDivergence(log: string[], answer: string[]): number {
 export function isPrefix(log: string[], answer: string[]): boolean {
   return firstDivergence(log, answer) === -1;
 }
+
+/**
+ * `:` の後に打ったキーが、いずれかのコマンド名の入力途中（または全体）になっているか。
+ * `<BS>` は1文字消す操作として扱い、それ以外の特殊キーが混ざれば false。
+ */
+export function isCommandPrefix(keys: string[], names: readonly string[]): boolean {
+  let text = '';
+  for (const k of keys) {
+    if (k === '<BS>') text = text.slice(0, -1);
+    else if (k.length === 1) text += k;
+    else return false;
+  }
+  return names.some((name) => name.startsWith(text));
+}

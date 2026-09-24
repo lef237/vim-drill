@@ -8,6 +8,9 @@ export interface AppCommandHandlers {
   quit(): void;
 }
 
+/** `:` の後に打てるアプリ用コマンド名（`:q` と `:quit` の両方を含む） */
+export const APP_COMMAND_NAMES = ['hint', 'skip', 'reset', 'q', 'quit'] as const;
+
 let current: AppCommandHandlers | null = null;
 let registered = false;
 

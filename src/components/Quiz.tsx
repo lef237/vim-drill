@@ -3,10 +3,10 @@ import type { EditorView } from '@codemirror/view';
 import type { Problem } from '../problems/types';
 import { parseMarked } from '../problems/parse';
 import { displayKey, tokenizeKeys } from '../engine/keys';
-import { firstDivergence, isPrefix, stateMatches } from '../engine/judge';
+import { firstDivergence, isCommandPrefix, isPrefix, stateMatches } from '../engine/judge';
 import type { QuestionResult, QuizConfig } from '../engine/session';
 import { snapshot, type EditorSnapshot } from '../editor/setup';
-import { registerAppCommands, setAppCommandHandlers } from '../editor/appCommands';
+import { APP_COMMAND_NAMES, registerAppCommands, setAppCommandHandlers } from '../editor/appCommands';
 import { getLoadedLanguage, loadLanguage } from '../editor/languages';
 import { useI18n } from '../i18n';
 import { VimEditor } from './VimEditor';
@@ -184,8 +184,13 @@ export function Quiz({ config, problems, onFinish, onQuit }: Props) {
       return;
     }
     if (!isPrefix(a.log, parsed.answer)) {
-      // `:hint` などを入力中かもしれないので、入力欄が閉じるまで待つ
-      if (!s.promptOpen) miss(s);
+      // `:hint` などアプリ用コマンドを入力中の間だけ判定を待ち、それ以外は即やり直し
+      const typingAppCommand =
+        s.promptOpen &&
+        a.promptStart !== null &&
+        a.log[a.promptStart] === ':' &&
+        isCommandPrefix(a.log.slice(a.promptStart + 1), APP_COMMAND_NAMES);
+      if (!typingAppCommand) miss(s);
       return;
     }
     if (a.log.length === parsed.answer.length) {
