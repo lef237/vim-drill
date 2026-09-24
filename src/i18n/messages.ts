@@ -45,9 +45,9 @@ const ja = {
   correct: '正解！',
   correctWithRetry: '正解！（やり直しあり）',
   correctLonger: (answer: string) => `正解！ もっと短い方法があります（例: ${answer}）`,
-  wrongKey: 'キーが違います。もう一度',
-  wrongKeyDetail: (expected: string, actual: string) =>
-    `「${expected}」を押すところで「${actual}」が押されました`,
+  wrongKey: (expected: string, actual: string) =>
+    `ここは「${actual}」ではなく「${expected}」です。最初からもう一度`,
+  wrongKeyRetry: '模範解答と違う入力になりました。最初からもう一度',
   altSolution: '別解でゴールしました。表示されたキーで再挑戦しましょう',
   skipped: (answer: string) => `スキップ（答え: ${answer}）`,
   hintLabel: 'ヒント',
@@ -126,8 +126,9 @@ const en: Messages = {
   correct: 'Correct!',
   correctWithRetry: 'Correct! (after retrying)',
   correctLonger: (answer: string) => `Correct! There is a shorter way (e.g. ${answer})`,
-  wrongKey: 'Wrong key. Try again',
-  wrongKeyDetail: (expected: string, actual: string) => `Expected “${expected}” but got “${actual}”`,
+  wrongKey: (expected: string, actual: string) =>
+    `The next key is “${expected}”, not “${actual}”. Starting over`,
+  wrongKeyRetry: 'That differs from the model answer. Starting over',
   altSolution: 'You reached the goal another way. Try again with the keys shown',
   skipped: (answer: string) => `Skipped (answer: ${answer})`,
   hintLabel: 'Hint',

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EditorView } from '@codemirror/view';
 import type { Problem } from '../problems/types';
 import { parseMarked } from '../problems/parse';
-import { tokenizeKeys } from '../engine/keys';
+import { displayKey, tokenizeKeys } from '../engine/keys';
 import { firstDivergence, isPrefix, stateMatches } from '../engine/judge';
 import type { QuestionResult, QuizConfig } from '../engine/session';
 import { snapshot, type EditorSnapshot } from '../editor/setup';
@@ -20,7 +20,12 @@ interface Props {
   onQuit: () => void;
 }
 
-type Feedback = { kind: 'ok' | 'miss' | 'alt' | 'info'; text: string };
+type Feedback = {
+  kind: 'ok' | 'miss' | 'alt' | 'info';
+  text: string;
+  /** 自動でやり直すまでの時間（残り時間のバーを表示する） */
+  resetMs?: number;
+};
 
 /** 1問ごとの可変状態。キー入力のたびに更新するので ref で持つ */
 interface Attempt {
@@ -150,8 +155,21 @@ export function Quiz({ config, problems, onFinish, onQuit }: Props) {
     a.locked = true;
     a.misses++;
     const reached = s.mode === 'normal' && stateMatches(s, parsed.goal, parsed.checkCursor);
-    setFeedback(reached ? { kind: 'alt', text: t.altSolution } : { kind: 'miss', text: t.wrongKey });
-    later(restart, reached ? 1500 : 1200);
+    const d = firstDivergence(a.log, parsed.answer);
+    const resetMs = reached ? 1500 : 1400;
+    setFeedback(
+      reached
+        ? { kind: 'alt', text: t.altSolution, resetMs }
+        : {
+            kind: 'miss',
+            text:
+              d !== -1 && d < parsed.answer.length
+                ? t.wrongKey(displayKey(parsed.answer[d]), displayKey(a.log[d]))
+                : t.wrongKeyRetry,
+            resetMs,
+          },
+    );
+    later(restart, resetMs);
   };
 
   const evaluate = () => {
@@ -190,8 +208,13 @@ export function Quiz({ config, problems, onFinish, onQuit }: Props) {
     const a = attempt.current;
     // 判定後〜次の問題・やり直しまでの間は入力を受け付けない
     if (a.locked) return false;
-    if (!inPrompt && (key === ':' || key === '/' || key === '?') && snapshot(view).mode !== 'insert') {
-      a.promptStart = a.log.length;
+    if (!inPrompt) {
+      const s = snapshot(view);
+      // 何も入力途中でないノーマルモードの Esc は何もしないので、打鍵にもミスにも数えない
+      if (key === '<Esc>' && s.mode === 'normal' && !s.pending) return;
+      if ((key === ':' || key === '/' || key === '?') && s.mode !== 'insert') {
+        a.promptStart = a.log.length;
+      }
     }
     if (inPrompt && key === '<Esc>' && a.promptStart !== null) {
       // コマンドライン入力を取り消したときは、その分のキーを数えない
@@ -261,7 +284,6 @@ export function Quiz({ config, problems, onFinish, onQuit }: Props) {
     later(() => setImeWarning(false), 4000);
   };
 
-  const divergence = firstDivergence(typed, parsed.answer);
   const hintText = problem.hint?.[lang] ?? (practice ? t.hintPractice : t.hintFirstKey(parsed.answer[0]));
 
   return (
@@ -293,9 +315,6 @@ export function Quiz({ config, problems, onFinish, onQuit }: Props) {
       <section className="prompt">
         <h1>{problem.prompt[lang]}</h1>
         {practice ? <KeyChips answer={parsed.answer} typed={typed} /> : <KeyStream typed={typed} />}
-        {practice && divergence !== -1 && feedback?.kind === 'miss' && divergence < parsed.answer.length && (
-          <p className="sub">{t.wrongKeyDetail(parsed.answer[divergence], typed[divergence])}</p>
-        )}
         {hintShown && (
           <p className="hint">
             {t.hintLabel}: {hintText}
@@ -328,7 +347,11 @@ export function Quiz({ config, problems, onFinish, onQuit }: Props) {
       </section>
 
       <div className={`feedback ${feedback ? feedback.kind : 'idle'}`} role="status" aria-live="polite">
-        {feedback?.text ?? ' '}
+        {feedback && <span className="feedback-icon" aria-hidden />}
+        <span>{feedback?.text ?? ' '}</span>
+        {feedback?.resetMs && (
+          <span className="feedback-timer" aria-hidden style={{ animationDuration: `${feedback.resetMs}ms` }} />
+        )}
       </div>
       {imeWarning && <div className="ime-warning">{t.imeWarning}</div>}
 

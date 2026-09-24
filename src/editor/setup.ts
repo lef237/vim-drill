@@ -11,6 +11,8 @@ export interface EditorSnapshot extends BufferState {
   mode: VimMode;
   /** `:` や `/` の入力欄が開いているか */
   promptOpen: boolean;
+  /** オペレータや回数など、入力途中のコマンドがあるか */
+  pending: boolean;
 }
 
 const theme = EditorView.theme({
@@ -72,18 +74,33 @@ export function snapshot(view: EditorView): EditorSnapshot {
   if (!cm) {
     const head = view.state.selection.main.head;
     const line = view.state.doc.lineAt(head);
-    return { text, cursor: { line: line.number - 1, ch: head - line.from }, mode: 'normal', promptOpen: false };
+    return {
+      text,
+      cursor: { line: line.number - 1, ch: head - line.from },
+      mode: 'normal',
+      promptOpen: false,
+      pending: false,
+    };
   }
   const vimState = cm.state.vim;
   const pos = cm.getCursor();
   let mode: VimMode = 'normal';
   if (vimState?.insertMode) mode = cm.state.overwrite ? 'replace' : 'insert';
   else if (vimState?.visualMode) mode = 'visual';
+  const input = vimState?.inputState;
+  const pending =
+    !!input &&
+    (input.keyBuffer.length > 0 ||
+      input.prefixRepeat.length > 0 ||
+      input.motionRepeat.length > 0 ||
+      !!input.operator ||
+      input.registerName !== undefined);
   return {
     text,
     cursor: { line: pos.line, ch: pos.ch },
     mode,
     promptOpen: view.dom.querySelector('.cm-vim-panel input') !== null,
+    pending,
   };
 }
 

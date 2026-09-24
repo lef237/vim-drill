@@ -311,12 +311,6 @@ code {
   margin-left: 4px;
 }
 
-.sub {
-  color: var(--error);
-  font-size: 0.9rem;
-  margin: 8px 0 0;
-}
-
 .hint {
   display: inline-block;
   margin: 10px 0 0;
@@ -399,11 +393,28 @@ code {
 }
 
 .feedback {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin-top: 16px;
   min-height: 2.6em;
   padding: 8px 14px;
+  border: 1px solid transparent;
   border-radius: 10px;
   font-weight: 600;
+  overflow: hidden;
+}
+
+.feedback-icon {
+  flex-shrink: 0;
+  width: 1.4em;
+  height: 1.4em;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.85em;
+  line-height: 1;
 }
 
 .feedback.ok {
@@ -411,15 +422,71 @@ code {
   color: var(--accent);
 }
 
+.feedback.ok .feedback-icon::before {
+  content: '✓';
+}
+
+/* 練習中のミスは失敗ではなく「やり直し」なので、エラー色ではなく落ち着いた色で示す */
 .feedback.miss {
-  background: var(--error-soft);
-  color: var(--error);
+  background: var(--panel);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.feedback.miss .feedback-icon {
+  background: var(--border);
+  color: var(--text);
+}
+
+.feedback.miss .feedback-icon::before {
+  content: '↺';
 }
 
 .feedback.alt,
 .feedback.info {
   background: var(--warn-soft);
   color: var(--warn);
+}
+
+.feedback.alt .feedback-icon::before,
+.feedback.info .feedback-icon::before {
+  content: 'i';
+  font-style: italic;
+  font-family: Georgia, serif;
+}
+
+.feedback.alt .feedback-icon,
+.feedback.info .feedback-icon {
+  border: 1.5px solid currentColor;
+}
+
+/* 自動でやり直すまでの残り時間 */
+.feedback-timer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 100%;
+  background: currentColor;
+  opacity: 0.35;
+  transform-origin: left;
+  animation: feedback-countdown linear forwards;
+}
+
+@keyframes feedback-countdown {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feedback-timer {
+    animation: none;
+    display: none;
+  }
 }
 
 .ime-warning {
