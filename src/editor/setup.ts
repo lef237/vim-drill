@@ -1,5 +1,5 @@
 import { EditorSelection, EditorState, type Extension } from '@codemirror/state';
-import { EditorView, drawSelection, highlightSpecialChars, lineNumbers } from '@codemirror/view';
+import { EditorView, ViewPlugin, drawSelection, highlightSpecialChars, lineNumbers } from '@codemirror/view';
 import { history } from '@codemirror/commands';
 import { indentUnit } from '@codemirror/language';
 import { Vim, getCM, vim } from '@replit/codemirror-vim';
@@ -38,7 +38,32 @@ const theme = EditorView.theme({
   '.cm-panels': { backgroundColor: 'var(--panel)', color: 'var(--text)', borderTop: '1px solid var(--border)' },
   '.cm-vim-panel': { fontFamily: 'var(--mono)', padding: '4px 12px', fontSize: '15px' },
   '.cm-vim-panel input': { color: 'var(--text)', fontFamily: 'var(--mono)', fontSize: '15px' },
+  // Vim のメッセージは種類を問わずインラインで赤が指定されるので、vimMessageTone の分類で色を付け直す
+  '.cm-vim-message': { color: 'var(--muted) !important' },
+  '.cm-vim-message[data-tone="error"]': { color: 'var(--error) !important' },
 });
+
+/** エラーではないお知らせのメッセージ。これ以外（"Not an editor command" など）はエラーとして扱う */
+const INFO_MESSAGES = [/\blines? yanked\b/, /^Found \d+ match/, /^recording @/, /^-{3,}/];
+
+/** Vim のメッセージにエラーかお知らせかの印（data-tone）を付ける */
+const vimMessageTone = ViewPlugin.fromClass(
+  class {
+    observer: MutationObserver;
+    constructor(view: EditorView) {
+      this.observer = new MutationObserver(() => {
+        view.dom.querySelectorAll('.cm-vim-message:not([data-tone])').forEach((el) => {
+          const text = el.textContent?.trim() ?? '';
+          el.setAttribute('data-tone', INFO_MESSAGES.some((re) => re.test(text)) ? 'info' : 'error');
+        });
+      });
+      this.observer.observe(view.dom, { childList: true, subtree: true });
+    }
+    destroy() {
+      this.observer.disconnect();
+    }
+  },
+);
 
 export function toOffset(text: string, cursor: Cursor): number {
   const lines = text.split('\n');
@@ -63,6 +88,7 @@ export function createEditorState(initial: BufferState, extra: Extension[] = [])
       indentUnit.of('  '),
       EditorState.tabSize.of(2),
       theme,
+      vimMessageTone,
       ...extra,
     ],
   });
