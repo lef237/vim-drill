@@ -214,6 +214,17 @@ code {
   font-size: 0.88rem;
 }
 
+.repo-link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.repo-link:hover,
+.repo-link:focus-visible {
+  color: var(--text);
+}
+
 /* ---------- 出題 ---------- */
 
 .quiz-head {

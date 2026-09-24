@@ -134,6 +134,11 @@ export function Home({ config, stats, onChange, onStart }: Props) {
         <span>
           <kbd>t</kbd> {t.helpLanguage}
         </span>
+        <span>
+          <a className="repo-link" href="https://github.com/lef237/vim-drill" target="_blank" rel="noopener noreferrer">
+            {t.sourceCode}
+          </a>
+        </span>
       </footer>
     </main>
   );
