@@ -1,0 +1,98 @@
+import type { Problem } from '../types';
+
+export const advancedProblems: Problem[] = [
+  {
+    id: 'adv-ctrl-a',
+    category: 'advanced',
+    level: 2,
+    prompt: { ja: '数値を 1 増やす', en: 'Increment the number by 1' },
+    before: 'count = |41',
+    after: 'count = 4|2',
+    answers: ['<C-a>'],
+  },
+  {
+    id: 'adv-ctrl-a-forward',
+    category: 'advanced',
+    level: 2,
+    prompt: {
+      ja: '行内の次の数値を 1 増やす（カーソル移動なしで）',
+      en: 'Increment the next number on the line by 1 (without moving first)',
+    },
+    before: '|width: 100px',
+    after: 'width: 10|1px',
+    answers: ['<C-a>'],
+    hint: {
+      ja: 'Ctrl-a はカーソル以降で最初の数値に作用します',
+      en: 'Ctrl-a acts on the first number at or after the cursor',
+    },
+  },
+  {
+    id: 'adv-ctrl-a-count',
+    category: 'advanced',
+    level: 2,
+    prompt: { ja: '数値を 10 増やす', en: 'Increase the number by 10' },
+    before: 'port = |8070',
+    after: 'port = 808|0',
+    answers: ['10<C-a>'],
+  },
+  {
+    id: 'adv-ctrl-x-count',
+    category: 'advanced',
+    level: 3,
+    prompt: { ja: '数値を 5 減らす', en: 'Decrease the number by 5' },
+    before: 'retries = |10',
+    after: 'retries = |5',
+    answers: ['5<C-x>'],
+  },
+  {
+    id: 'adv-dot-count',
+    category: 'advanced',
+    level: 3,
+    prompt: {
+      ja: 'dw で1単語消し、. に回数を付けて残り2単語も消す',
+      en: 'Delete one word with dw, then delete two more by giving . a count',
+    },
+    before: '|one two three four',
+    after: '|four',
+    answers: ['dw2.', 'd3w', '3dw'],
+    hint: { ja: '. の前に回数を付けられます', en: 'You can put a count before .' },
+  },
+  {
+    id: 'adv-register',
+    category: 'advanced',
+    level: 3,
+    prompt: {
+      ja: '1行目を a レジスタにヤンクし、最終行の下に貼り付け',
+      en: 'Yank the first line into register a and paste it below the last line',
+    },
+    before: ['|header', 'body'],
+    after: ['header', 'body', '|header'],
+    answers: ['"ayyG"ap'],
+    hint: { ja: '"a でレジスタ a を指定します', en: '"a selects register a' },
+  },
+  {
+    id: 'adv-macro',
+    category: 'advanced',
+    level: 3,
+    prompt: {
+      ja: 'マクロを記録して、3行すべての末尾に ; を付ける',
+      en: 'Record a macro to add ; to the end of all three lines',
+    },
+    before: ['|a()', 'b()', 'c()'],
+    after: ['a();', 'b();', 'c()|;'],
+    answers: ['qqA;<Esc>jq2@q', 'qaA;<Esc>jq2@a'],
+    hint: {
+      ja: 'q{レジスタ} で記録開始、q で終了、@{レジスタ} で再生',
+      en: 'q{register} starts recording, q stops, @{register} replays',
+    },
+  },
+  {
+    id: 'adv-paste-replace',
+    category: 'advanced',
+    level: 3,
+    prompt: { ja: 'left をヤンクし、right をそれで置き換える', en: 'Yank left, then replace right with it' },
+    before: 'x = |left; y = right;',
+    after: 'x = left; y = lef|t;',
+    answers: ['yiwfrviwp', 'yiwfrcw<C-r>0<Esc>'],
+  },
+];
